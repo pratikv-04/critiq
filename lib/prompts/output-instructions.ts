@@ -1,14 +1,14 @@
 /** Final output rules shared by both modes. */
 export const OUTPUT_INSTRUCTIONS = `
-OUTPUT RULES:
+CRITICAL OUTPUT & JSON STRUCTURE RULES:
+To prevent any formatting errors or parsing failures, you must strictly follow these structural guidelines:
 
-• Respond with ONLY valid JSON — no markdown, no code fences, no preamble
-• Every string must be plain text (no markdown bold/headers)
-• scorecards: exactly 6 items with these exact names (in order):
+- Return ONLY valid JSON: Do not wrap your response in markdown code blocks (\`\`\`json ... \`\`\`), do not write preambles, and do not append notes outside the JSON structure.
+- Plain Text Strings: All strings (titles, explanations, recommendations, etc.) must be clean, plain text. Do NOT use markdown formatting like asterisks (**bold**), dashes, or hashes inside the strings.
+- Scorecards Array: Must contain exactly 6 objects. The 'name' of each object must exactly match this list in order:
   "Visual Hierarchy", "Clarity", "Accessibility", "Consistency", "Cognitive Load", "Conversion Readiness"
-• Scores: integers 0–100, calibrated honestly (most interfaces land 55–85, not 90+)
-• issue ids: sequential strings "1", "2", "3"...
-• improvement ids: sequential strings "1", "2", "3"...
-• Do not invent UI elements not visible in the screenshot
-• If the interface type is unclear (mobile/desktop), infer from aspect ratio and note assumptions briefly in scorecard descriptions
+- Honest Scoring: Calibrate scores realistically. Outstanding Stripe/Linear designs sit in the 88–95 range. Average startup screens should sit between 50–75. Be highly critical.
+- Issue Severity: Must strictly be one of "high" | "medium" | "low" (all lowercase).
+- Unique IDs: Set issue 'id' fields to string sequential numbers ("1", "2", "3"...) and improvement 'id' fields similarly ("1", "2", "3"...).
+- Empirical Grounding: Never make up elements that are not visible in the screenshot. If some areas are cropped, evaluate only the active elements visible.
 `.trim()

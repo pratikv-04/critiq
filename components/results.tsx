@@ -28,12 +28,26 @@ export function Results() {
 
   return (
     <motion.div
-      className="min-h-screen py-10 sm:py-14 px-4 sm:px-6"
+      className={`min-h-screen py-10 sm:py-14 px-4 sm:px-6 relative transition-all duration-1000 ${
+        isRoastMode
+          ? 'bg-gradient-to-b from-red-500/[0.02] via-background to-orange-500/[0.01]'
+          : 'bg-gradient-to-b from-slate-500/[0.01] via-background to-violet-500/[0.01]'
+      }`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.5 }}
     >
-      <div className="max-w-4xl mx-auto">
+      {/* Roast Mode Theatrical Top Glow Shimmer */}
+      {isRoastMode && (
+        <motion.div
+          className="absolute top-0 inset-x-0 h-56 bg-gradient-to-b from-red-500/[0.05] via-orange-500/[0.02] to-transparent blur-3xl pointer-events-none z-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+        />
+      )}
+
+      <div className="max-w-4xl mx-auto relative z-10">
         {/* Header */}
         <motion.header
           className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 sm:mb-14 gap-5"

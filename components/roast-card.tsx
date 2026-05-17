@@ -10,7 +10,7 @@ interface RoastCardProps {
 export function RoastCard({ roast }: RoastCardProps) {
   return (
     <motion.div
-      className="relative p-6 sm:p-8 rounded-2xl overflow-hidden border border-red-200/70 bg-gradient-to-br from-red-50 via-orange-50/50 to-red-50/30"
+      className="relative p-6 sm:p-8 rounded-2xl overflow-hidden border border-red-500/20 bg-gradient-to-br from-red-500/[0.03] via-orange-500/[0.02] to-red-500/[0.01] shadow-[0_12px_45px_rgba(239,68,68,0.06)] hover:border-red-500/40 transition-colors duration-700"
       initial={{ opacity: 0, y: 24, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.8, ease: easePremium }}
@@ -45,7 +45,7 @@ export function RoastCard({ roast }: RoastCardProps) {
             animate={{ opacity: [0.7, 1, 0.7] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            Event
+            Brutal Verdict
           </motion.span>
         </motion.div>
         <motion.p

@@ -24,7 +24,7 @@ export function ImprovementCard({ improvement, index = 0 }: ImprovementCardProps
           <h3 className="font-medium text-foreground mb-2 leading-snug">
             {improvement.title}
           </h3>
-          <p className="text-foreground/60 text-sm mb-4 leading-relaxed">
+          <p className="text-foreground/80 text-sm mb-4 leading-relaxed font-normal">
             {improvement.description}
           </p>
           <motion.span

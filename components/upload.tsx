@@ -204,18 +204,20 @@ export function Upload() {
       >
         <motion.button
           onClick={handleBack}
-          className="px-6 py-3.5 rounded-full border border-foreground/15 text-foreground font-medium hover:bg-foreground/[0.03]"
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.98 }}
+          className="px-8 py-4 rounded-full border border-foreground/12 text-foreground/80 font-medium hover:bg-foreground/[0.02] hover:text-foreground transition-all duration-300"
+          whileHover={{ scale: 1.01, y: -0.5 }}
+          whileTap={{ scale: 0.99 }}
+          transition={{ type: 'spring', stiffness: 380, damping: 26 }}
         >
           Back
         </motion.button>
         <motion.button
           onClick={handleAnalyze}
           disabled={!uploadedFile}
-          className="flex-1 px-6 py-3.5 rounded-full bg-foreground text-background font-medium disabled:opacity-40 disabled:cursor-not-allowed"
-          whileHover={uploadedFile ? { scale: 1.01 } : {}}
-          whileTap={uploadedFile ? { scale: 0.98 } : {}}
+          className="flex-1 px-8 py-4 rounded-full bg-foreground text-background font-medium disabled:opacity-35 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-shadow duration-500"
+          whileHover={uploadedFile ? { scale: 1.012, y: -0.5 } : {}}
+          whileTap={uploadedFile ? { scale: 0.988 } : {}}
+          transition={{ type: 'spring', stiffness: 380, damping: 26 }}
         >
           Begin analysis
         </motion.button>

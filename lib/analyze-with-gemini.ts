@@ -9,6 +9,8 @@ const MODEL_FALLBACK_CHAIN = [
   process.env.GEMINI_MODEL,
   'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash',
   'gemini-flash-latest',
 ].filter((m, i, arr): m is string => Boolean(m) && arr.indexOf(m) === i)
 

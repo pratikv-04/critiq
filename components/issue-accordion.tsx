@@ -83,7 +83,7 @@ export function IssueAccordion({ issue, isExpanded, onToggle }: IssueAccordionPr
                 <h4 className="text-[10px] font-semibold text-foreground/45 uppercase tracking-wider mb-1.5">
                   {section.label}
                 </h4>
-                <p className="text-sm text-foreground/65 leading-relaxed">{section.content}</p>
+                <p className="text-sm text-foreground/80 leading-relaxed">{section.content}</p>
               </motion.div>
             ))}
           </motion.div>
