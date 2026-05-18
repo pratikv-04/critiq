@@ -81,7 +81,7 @@ export function Landing() {
                 transition={{ duration: 4, repeat: Infinity }}
               >
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-serif text-lg font-semibold text-foreground">Design Analysis</h3>
+                  <h3 className="font-serif text-lg font-normal text-foreground">Design Analysis</h3>
                   <div className="flex gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-400"></div>
                     <div className="w-2 h-2 rounded-full bg-blue-400"></div>

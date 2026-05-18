@@ -59,7 +59,7 @@ export function Results() {
             <p className="text-xs font-medium tracking-[0.15em] uppercase text-foreground/40 mb-2">
               Audit complete
             </p>
-            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-foreground tracking-tight mb-2">
+            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal text-foreground tracking-tight mb-2">
               Your design verdict
             </h1>
             <p className="text-foreground/55 text-sm sm:text-base max-w-md">

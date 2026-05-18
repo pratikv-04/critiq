@@ -119,7 +119,7 @@ export function Scorecard({ name, score, description, index = 0 }: ScorecardProp
         />
       </motion.div>
 
-      <p className="text-xs text-foreground/75 leading-relaxed font-normal">{description}</p>
+      <p className="text-sm text-foreground/75 leading-relaxed font-normal">{description}</p>
 
       {/* Futuristic Visual Confidence Indicator */}
       <span className="text-[8px] font-mono tracking-widest text-foreground/30 uppercase mt-4 block text-right">

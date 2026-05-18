@@ -79,7 +79,7 @@ export function Upload() {
         <p className="text-xs font-medium tracking-[0.15em] uppercase text-foreground/40 mb-3">
           Step 1 of 2
         </p>
-        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 tracking-tight">
+        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal text-foreground mb-3 tracking-tight">
           Upload your design
         </h1>
         <p className="text-foreground/55 text-base sm:text-lg leading-relaxed">
