@@ -35,6 +35,7 @@ export async function POST(request: Request) {
 
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
+    console.log("ENV CHECK:", process.env.GEMINI_API_KEY)
     const audit = await analyzeImageWithGemini(buffer, file.type, { roastMode })
 
     return NextResponse.json(audit)
