@@ -19,6 +19,8 @@ export interface AnalyzeImageOptions {
 }
 
 function getApiKey(): string {
+  console.log("DIRECT ENV:", process.env.GEMINI_API_KEY)
+  
   const key = process.env.GEMINI_API_KEY?.trim()
   if (!key) {
     throw new Error('GEMINI_API_KEY is not configured. Add it to .env.local')
