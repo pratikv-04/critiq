@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { analyzeImageWithGemini } from '@/lib/analyze-with-gemini'
 import { toUserFriendlyGeminiError } from '@/lib/gemini-errors'
 
+export const runtime = 'nodejs'
+
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp']
 
