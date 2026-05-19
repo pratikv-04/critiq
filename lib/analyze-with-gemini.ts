@@ -6,12 +6,11 @@ import type { GeminiAuditResponse } from '@/lib/types'
 
 /** Models tried in order. Duplicates act as retries. */
 const MODEL_FALLBACK_CHAIN = [
-  process.env.GEMINI_MODEL,
-  'gemini-2.5-flash',
-  'gemini-2.5-flash', // Automatically retry once
-  'gemini-1.5-flash',
+  process.env.GEMINI_MODEL !== 'gemini-2.5-flash' ? process.env.GEMINI_MODEL : null,
+  'gemini-2.5-flash', // Primary
+  'gemini-2.5-flash', // Max one retry
+  'gemini-1.5-flash', // Then fallback once
 ].filter((m): m is string => Boolean(m))
-
 export interface AnalyzeImageOptions {
   roastMode?: boolean
 }

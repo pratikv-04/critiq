@@ -1,12 +1,6 @@
-import { DETECTION_PATTERNS } from './detection-patterns'
-import { EVALUATION_DIMENSIONS } from './evaluation-dimensions'
-import { EXPERT_PERSONAS } from './personas'
-import { ISSUE_STRUCTURE_RULES } from './issue-structure'
-import { OUTPUT_INSTRUCTIONS } from './output-instructions'
-import { UX_PRINCIPLES } from './principles'
-import { TONE_ROAST } from './tone-roast'
-import { TONE_STANDARD } from './tone-standard'
-import { CRITIQUE_PHILOSOPHY } from './critique-philosophy'
+import { CORE_SYSTEM_PROMPT } from './core-system'
+import { EVALUATION_CATEGORIES } from './evaluation-categories'
+import { ROAST_LAYER } from './roast-layer'
 
 export interface BuildPromptOptions {
   roastMode: boolean
@@ -16,18 +10,13 @@ export interface BuildPromptOptions {
  * Assembles the full system instruction for Gemini from modular prompt files.
  */
 export function buildSystemPrompt(options: BuildPromptOptions): string {
-  const tone = options.roastMode ? TONE_ROAST : TONE_STANDARD
+  const parts = [CORE_SYSTEM_PROMPT, EVALUATION_CATEGORIES]
+  
+  if (options.roastMode) {
+    parts.push(ROAST_LAYER)
+  }
 
-  return [
-    EXPERT_PERSONAS,
-    CRITIQUE_PHILOSOPHY,
-    UX_PRINCIPLES,
-    EVALUATION_DIMENSIONS,
-    DETECTION_PATTERNS,
-    ISSUE_STRUCTURE_RULES,
-    tone,
-    OUTPUT_INSTRUCTIONS,
-  ].join('\n\n')
+  return parts.join('\n\n')
 }
 
 /**
@@ -35,20 +24,18 @@ export function buildSystemPrompt(options: BuildPromptOptions): string {
  */
 export function buildUserPrompt(options: BuildPromptOptions): string {
   const modeLabel = options.roastMode
-    ? 'ROAST MODE is ON — deliver witty, sarcastic, meme-aware critique that remains deeply insightful.'
-    : 'STANDARD MODE — deliver a senior staff-level product design critique.'
+    ? 'ROAST MODE is ON — deliver witty, sarcastic critique alongside the audit.'
+    : 'STANDARD MODE — deliver a professional product design critique.'
 
   return `${modeLabel}
 
 Analyze this UI screenshot. Produce a rigorous UX audit as JSON.
 
-Before writing JSON, mentally complete this review sequence:
-1. Identify interface type (landing, dashboard, onboarding, settings, mobile app, etc.)
-2. Determine the primary user job-to-be-done
-3. Trace the visual hierarchy — where does the eye go in 2 seconds?
-4. Hunt for anti-patterns from the detection checklist
-5. Score each dimension honestly with evidence from the image
-6. Prioritize issues by user and business impact
+Follow this sequence:
+1. Identify interface type and primary user job-to-be-done.
+2. Trace visual hierarchy.
+3. Score each of the 12 categories honestly.
+4. Document specific, evidence-based issues and clear improvements.
 
 Return the complete JSON object now.`
 }

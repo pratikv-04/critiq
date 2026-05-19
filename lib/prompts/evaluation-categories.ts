@@ -1,0 +1,13 @@
+export const EVALUATION_CATEGORIES = `Score the following 12 categories on a scale of 1-10 (each):
+- Visual Hierarchy
+- Typography
+- Spacing & Layout
+- Accessibility
+- CTA Clarity
+- Navigation Clarity
+- Information Density
+- Visual Consistency
+- UX Friction
+- Emotional Tone
+- Mobile Friendliness
+- Product Maturity`
