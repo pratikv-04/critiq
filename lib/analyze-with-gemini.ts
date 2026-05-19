@@ -4,7 +4,6 @@ import { normalizeAuditResponse } from '@/lib/normalize-audit-response'
 import { buildSystemPrompt, buildUserPrompt } from '@/lib/prompts'
 import type { GeminiAuditResponse } from '@/lib/types'
 
-/** Models tried in order. Duplicates act as retries. */
 const MODEL_FALLBACK_CHAIN = [
   'gemini-1.5-flash',
 ].filter((m): m is string => Boolean(m))
@@ -14,12 +13,12 @@ export interface AnalyzeImageOptions {
 }
 
 function getApiKey(): string {
+  const key = process.env.GEMINI_API_KEY?.trim()
 
-
-  const key = "AIzaSyDVLiN3ezYQ5cLp0wX3Tbf6AxS-XxwhcBs"
   if (!key) {
-    throw new Error('GEMINI_API_KEY is not configured. Add it to .env.local')
+    throw new Error('GEMINI_API_KEY is not configured')
   }
+
   return key
 }
 
@@ -33,7 +32,7 @@ function parseGeminiJson(text: string): GeminiAuditResponse {
   return JSON.parse(cleaned) as GeminiAuditResponse
 }
 
-function isQuotaError(error: unknown): boolean {
+function isRetryableError(error: unknown): boolean {
   const msg =
     error instanceof Error
       ? error.message.toLowerCase()
@@ -46,8 +45,8 @@ function isQuotaError(error: unknown): boolean {
     msg.includes('503') ||
     msg.includes('overloaded') ||
     msg.includes('unavailable') ||
-    msg.includes('model is overloaded') ||
     msg.includes('internal') ||
+    msg.includes('timeout') ||
     msg.includes('temporarily unavailable')
   )
 }
@@ -66,35 +65,30 @@ async function generateWithModel(
     generationConfig: {
       responseMimeType: 'application/json',
       responseSchema: AUDIT_RESPONSE_SCHEMA,
-      temperature: roastMode ? 0.3 : 0.1,
-      topP: 0.95,
+      temperature: roastMode ? 0.45 : 0.2,
+      topP: 0.9,
     },
   })
 
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 60000)
-
-  try {
-    const result = await model.generateContent([
-      buildUserPrompt({ roastMode }),
-      {
-        inlineData: {
-          data: imageBuffer.toString('base64'),
-          mimeType,
-        },
+  const result = await model.generateContent([
+    buildUserPrompt({ roastMode }),
+    {
+      inlineData: {
+        data: imageBuffer.toString('base64'),
+        mimeType,
       },
-    ], { signal: controller.signal })
+    },
+  ])
 
-    const text = result.response.text()
-    if (!text) {
-      throw new Error('Gemini returned an empty response')
-    }
+  const text = result.response.text()
 
-    const parsed = parseGeminiJson(text)
-    return normalizeAuditResponse(parsed)
-  } finally {
-    clearTimeout(timeout)
+  if (!text) {
+    throw new Error('Gemini returned an empty response')
   }
+
+  const parsed = parseGeminiJson(text)
+
+  return normalizeAuditResponse(parsed)
 }
 
 export async function analyzeImageWithGemini(
@@ -103,17 +97,23 @@ export async function analyzeImageWithGemini(
   options: AnalyzeImageOptions = {}
 ): Promise<GeminiAuditResponse> {
   const roastMode = options.roastMode ?? false
+
   let lastError: unknown
 
   for (const modelName of MODEL_FALLBACK_CHAIN) {
     try {
-      return await generateWithModel(modelName, imageBuffer, mimeType, roastMode)
+      return await generateWithModel(
+        modelName,
+        imageBuffer,
+        mimeType,
+        roastMode
+      )
     } catch (error) {
       lastError = error
-      console.warn(`[gemini] Model ${modelName} failed:`, error)
 
-      // Try next model on quota, 503, or timeout errors
-      if (!isQuotaError(error) && !String(error).includes('503') && !String(error).includes('AbortError')) {
+      console.error(`[Gemini Error - ${modelName}]`, error)
+
+      if (!isRetryableError(error)) {
         throw error
       }
     }
