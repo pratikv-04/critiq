@@ -88,6 +88,7 @@ export function Results() {
             screenshotUrl={analysisResult.screenshotUrl}
             isRoastMode={isRoastMode}
             headline={summaryHeadline}
+            verdictScore={analysisResult.verdictScore}
           />
         </RevealSection>
 

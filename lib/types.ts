@@ -32,6 +32,7 @@ export interface AnalysisResult {
   issues: Issue[]
   roastSummary: string
   improvements: Improvement[]
+  verdictScore: number
 }
 
 /** Shape returned by Gemini (before we add screenshotUrl). */
@@ -41,4 +42,5 @@ export interface GeminiAuditResponse {
   issues: Issue[]
   roastSummary: string
   improvements: Improvement[]
+  verdictScore?: number
 }

@@ -10,6 +10,7 @@ interface AuditSummaryProps {
   screenshotUrl: string
   isRoastMode: boolean
   headline?: string
+  verdictScore: number
 }
 
 function getGrade(score: number): { label: string; description: string } {
@@ -24,12 +25,10 @@ export function AuditSummary({
   screenshotUrl,
   isRoastMode,
   headline,
+  verdictScore,
 }: AuditSummaryProps) {
-  const overall = Math.round(
-    scorecards.reduce((sum, s) => sum + s.score, 0) / scorecards.length
-  )
-  const animatedOverall = useAnimatedScore(overall, 1600, 200)
-  const grade = getGrade(overall)
+  const animatedOverall = useAnimatedScore(verdictScore, 1600, 200)
+  const grade = getGrade(verdictScore)
 
   return (
     <motion.div
@@ -79,14 +78,14 @@ export function AuditSummary({
           <div className="h-1.5 rounded-full bg-foreground/8 overflow-hidden">
             <motion.div
               className={`h-full rounded-full ${
-                overall >= 80
+                verdictScore >= 80
                   ? 'bg-emerald-500'
-                  : overall >= 60
+                  : verdictScore >= 60
                     ? 'bg-amber-500'
                     : 'bg-orange-500'
               }`}
               initial={{ width: 0 }}
-              animate={{ width: `${overall}%` }}
+              animate={{ width: `${verdictScore}%` }}
               transition={{ duration: 1.2, delay: 0.3, ease: easePremium }}
             />
           </div>

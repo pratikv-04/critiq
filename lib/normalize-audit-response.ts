@@ -2,12 +2,33 @@ import type { GeminiAuditResponse, Issue, ScorecardData } from '@/lib/types'
 
 const REQUIRED_SCORECARD_NAMES = [
   'Visual Hierarchy',
-  'Clarity',
+  'Typography',
+  'Spacing & Layout',
   'Accessibility',
-  'Consistency',
-  'Cognitive Load',
-  'Conversion Readiness',
+  'CTA Clarity',
+  'Navigation Clarity',
+  'Information Density',
+  'Visual Consistency',
+  'UX Friction',
+  'Emotional Tone',
+  'Mobile Friendliness',
+  'Product Maturity'
 ] as const
+
+const SCORECARD_WEIGHTS: Record<typeof REQUIRED_SCORECARD_NAMES[number], number> = {
+  'Visual Hierarchy': 1.2,
+  'Typography': 1.0,
+  'Spacing & Layout': 1.0,
+  'Accessibility': 1.2,
+  'CTA Clarity': 1.1,
+  'Navigation Clarity': 1.1,
+  'Information Density': 1.0,
+  'Visual Consistency': 1.0,
+  'UX Friction': 1.3,
+  'Emotional Tone': 0.9,
+  'Mobile Friendliness': 0.8,
+  'Product Maturity': 1.4,
+}
 
 const VALID_SEVERITIES = new Set(['high', 'medium', 'low'])
 
@@ -44,12 +65,32 @@ function normalizeScorecards(scorecards: ScorecardData[]): ScorecardData[] {
 
   return REQUIRED_SCORECARD_NAMES.map((name) => {
     const existing = byName.get(name)
+    let rawScore = existing?.score ?? 5
+    
+    // Scale up 1-10 scores to 10-100
+    if (rawScore <= 10) {
+      rawScore = rawScore * 10
+    }
+    
     return {
       name,
-      score: clampScore(existing?.score ?? 50),
+      score: clampScore(rawScore),
       description: existing?.description?.trim() || 'Insufficient detail from analysis.',
     }
   })
+}
+
+function calculateVerdictScore(scorecards: ScorecardData[]): number {
+  let totalWeight = 0
+  let weightedSum = 0
+
+  for (const scorecard of scorecards) {
+    const weight = SCORECARD_WEIGHTS[scorecard.name as keyof typeof SCORECARD_WEIGHTS] ?? 1.0
+    totalWeight += weight
+    weightedSum += scorecard.score * weight
+  }
+
+  return totalWeight > 0 ? clampScore(weightedSum / totalWeight) : 50
 }
 
 /** Validates and normalizes raw Gemini output for reliable UI rendering. */
@@ -58,8 +99,11 @@ export function normalizeAuditResponse(raw: GeminiAuditResponse): GeminiAuditRes
     throw new Error('AI response is missing required fields')
   }
 
+  const normalizedScorecards = normalizeScorecards(raw.scorecards)
+  const verdictScore = calculateVerdictScore(normalizedScorecards)
+
   return {
-    scorecards: normalizeScorecards(raw.scorecards),
+    scorecards: normalizedScorecards,
     whatWorking: raw.whatWorking
       .map((s) => s.trim())
       .filter(Boolean)
@@ -75,5 +119,6 @@ export function normalizeAuditResponse(raw: GeminiAuditResponse): GeminiAuditRes
       }))
       .filter((imp) => imp.title && imp.description)
       .slice(0, 6),
+    verdictScore,
   }
 }
