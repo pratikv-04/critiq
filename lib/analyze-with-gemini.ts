@@ -4,15 +4,13 @@ import { normalizeAuditResponse } from '@/lib/normalize-audit-response'
 import { buildSystemPrompt, buildUserPrompt } from '@/lib/prompts'
 import type { GeminiAuditResponse } from '@/lib/types'
 
-/** Models tried in order — first with available quota wins. */
+/** Models tried in order. Duplicates act as retries. */
 const MODEL_FALLBACK_CHAIN = [
   process.env.GEMINI_MODEL,
   'gemini-2.5-flash',
-  'gemini-2.5-flash-lite',
-  'gemini-2.0-flash',
+  'gemini-2.5-flash', // Automatically retry once
   'gemini-1.5-flash',
-  'gemini-flash-latest',
-].filter((m, i, arr): m is string => Boolean(m) && arr.indexOf(m) === i)
+].filter((m): m is string => Boolean(m))
 
 export interface AnalyzeImageOptions {
   roastMode?: boolean
@@ -57,28 +55,35 @@ async function generateWithModel(
     generationConfig: {
       responseMimeType: 'application/json',
       responseSchema: AUDIT_RESPONSE_SCHEMA,
-      temperature: roastMode ? 0.75 : 0.45,
-      topP: 0.9,
+      temperature: roastMode ? 0.3 : 0.1,
+      topP: 0.95,
     },
   })
 
-  const result = await model.generateContent([
-    buildUserPrompt({ roastMode }),
-    {
-      inlineData: {
-        data: imageBuffer.toString('base64'),
-        mimeType,
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 60000)
+
+  try {
+    const result = await model.generateContent([
+      buildUserPrompt({ roastMode }),
+      {
+        inlineData: {
+          data: imageBuffer.toString('base64'),
+          mimeType,
+        },
       },
-    },
-  ])
+    ], { signal: controller.signal })
 
-  const text = result.response.text()
-  if (!text) {
-    throw new Error('Gemini returned an empty response')
+    const text = result.response.text()
+    if (!text) {
+      throw new Error('Gemini returned an empty response')
+    }
+
+    const parsed = parseGeminiJson(text)
+    return normalizeAuditResponse(parsed)
+  } finally {
+    clearTimeout(timeout)
   }
-
-  const parsed = parseGeminiJson(text)
-  return normalizeAuditResponse(parsed)
 }
 
 export async function analyzeImageWithGemini(
@@ -96,8 +101,8 @@ export async function analyzeImageWithGemini(
       lastError = error
       console.warn(`[gemini] Model ${modelName} failed:`, error)
 
-      // Try next model only on quota errors
-      if (!isQuotaError(error)) {
+      // Try next model on quota, 503, or timeout errors
+      if (!isQuotaError(error) && !String(error).includes('503') && !String(error).includes('AbortError')) {
         throw error
       }
     }

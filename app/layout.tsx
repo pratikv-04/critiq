@@ -8,24 +8,11 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 const _instrumentSerif = Instrument_Serif({ weight: '400', subsets: ["latin"], variable: '--font-serif' });
 
 export const metadata: Metadata = {
-  title: 'Critiq - AI-Powered UX Audit',
+  title: 'Critiq — AI UX Audit',
   description: 'Get brutally honest UX feedback from AI. Upload any interface and get actionable insights.',
   generator: 'v0.app',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
+    icon: '/favicon.png',
     apple: '/apple-icon.png',
   },
 }
