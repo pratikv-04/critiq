@@ -11,7 +11,7 @@ export interface BuildPromptOptions {
  */
 export function buildSystemPrompt(options: BuildPromptOptions): string {
   const parts = [CORE_SYSTEM_PROMPT, EVALUATION_CATEGORIES]
-  
+
   if (options.roastMode) {
     parts.push(ROAST_LAYER)
   }
@@ -37,5 +37,13 @@ Follow this sequence:
 3. Score each of the 12 categories honestly.
 4. Document specific, evidence-based issues and clear improvements.
 
-Return the complete JSON object now.`
+Return the complete JSON object now.
+
+Avoid overly rounded scores like 70, 80, and 90 unless strongly justified.
+
+Use nuanced realistic scoring such as:
+67, 72, 74, 81, 84, 88, etc.
+
+Not every category should score highly.
+Scores should feel evidence-based and varied.`
 }
