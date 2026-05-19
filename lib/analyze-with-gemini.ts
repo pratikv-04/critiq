@@ -5,7 +5,7 @@ import { buildSystemPrompt, buildUserPrompt } from '@/lib/prompts'
 import type { GeminiAuditResponse } from '@/lib/types'
 
 const MODEL_FALLBACK_CHAIN = [
-  'gemini-1.5-flash-latest',
+  'gemini-2.0-flash',
 ].filter((m): m is string => Boolean(m))
 
 export interface AnalyzeImageOptions {
