@@ -7,7 +7,7 @@ import type { GeminiAuditResponse } from '@/lib/types'
 /** Models tried in order. Duplicates act as retries. */
 const MODEL_FALLBACK_CHAIN = [
   'gemini-1.5-flash',
-]
+].filter((m): m is string => Boolean(m))
 
 export interface AnalyzeImageOptions {
   roastMode?: boolean
@@ -16,7 +16,7 @@ export interface AnalyzeImageOptions {
 function getApiKey(): string {
 
 
-  const key = "AIzaSyA2aK1tq_DIcPDdG_DuI95lXRnd2c07lgo"
+  const key = "AIzaSyDVLiN3ezYQ5cLp0wX3Tbf6AxS-XxwhcBs"
   if (!key) {
     throw new Error('GEMINI_API_KEY is not configured. Add it to .env.local')
   }
