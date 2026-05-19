@@ -6,6 +6,7 @@ import { OUTPUT_INSTRUCTIONS } from './output-instructions'
 import { UX_PRINCIPLES } from './principles'
 import { TONE_ROAST } from './tone-roast'
 import { TONE_STANDARD } from './tone-standard'
+import { CRITIQUE_PHILOSOPHY } from './critique-philosophy'
 
 export interface BuildPromptOptions {
   roastMode: boolean
@@ -19,6 +20,7 @@ export function buildSystemPrompt(options: BuildPromptOptions): string {
 
   return [
     EXPERT_PERSONAS,
+    CRITIQUE_PHILOSOPHY,
     UX_PRINCIPLES,
     EVALUATION_DIMENSIONS,
     DETECTION_PATTERNS,
