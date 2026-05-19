@@ -16,7 +16,7 @@ export interface AnalyzeImageOptions {
 }
 
 function getApiKey(): string {
-  
+
 
   const key = "AIzaSyA2aK1tq_DIcPDdG_DuI95lXRnd2c07lgo"
   if (!key) {
@@ -36,8 +36,22 @@ function parseGeminiJson(text: string): GeminiAuditResponse {
 }
 
 function isQuotaError(error: unknown): boolean {
-  const msg = error instanceof Error ? error.message : String(error)
-  return msg.includes('429') || msg.includes('quota') || msg.includes('Quota exceeded')
+  const msg =
+    error instanceof Error
+      ? error.message.toLowerCase()
+      : String(error).toLowerCase()
+
+  return (
+    msg.includes('429') ||
+    msg.includes('quota') ||
+    msg.includes('quota exceeded') ||
+    msg.includes('503') ||
+    msg.includes('overloaded') ||
+    msg.includes('unavailable') ||
+    msg.includes('model is overloaded') ||
+    msg.includes('internal') ||
+    msg.includes('temporarily unavailable')
+  )
 }
 
 async function generateWithModel(
