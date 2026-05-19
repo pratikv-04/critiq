@@ -63,8 +63,6 @@ async function generateWithModel(
     model: modelName,
     systemInstruction: buildSystemPrompt({ roastMode }),
     generationConfig: {
-      responseMimeType: 'application/json',
-      responseSchema: AUDIT_RESPONSE_SCHEMA,
       temperature: roastMode ? 0.45 : 0.2,
       topP: 0.9,
     },
