@@ -44,27 +44,18 @@ function normalizeScorecards(scorecards: ScorecardData[]): ScorecardData[] {
 
   return REQUIRED_SCORECARD_NAMES.map((name) => {
     const existing = byName.get(name)
-    // Extract raw score safely, defaulting to a neutral 5 (out of 10) when missing.
+    // Pull raw score; default to a neutral 50 if missing or invalid.
     let rawScore: number | undefined = existing?.score
-    // Coerce to number if possible.
     if (rawScore === undefined || rawScore === null) {
-      rawScore = 5
+      rawScore = 50
     } else {
       rawScore = Number(rawScore)
-      // If conversion failed, fall back to neutral.
-      if (!Number.isFinite(rawScore)) {
-        rawScore = 5
+      if (!Number.isFinite(rawScore) || rawScore < 0) {
+        rawScore = 50
       }
     }
-
-    // Convert 0‑10 scale to 0‑100 while preserving decimal precision.
-    if (rawScore <= 10) {
-      rawScore = (rawScore / 10) * 100
-    }
-
-    // Clamp to valid range with two‑decimal precision.
+    // Clamp to 0‑100 with two‑decimal precision.
     const finalScore = clampScore(rawScore)
-
     return {
       name,
       score: finalScore,
