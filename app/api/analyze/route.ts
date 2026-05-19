@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
-    
+
     const audit = await analyzeImageWithGemini(buffer, file.type, { roastMode })
 
     return NextResponse.json(audit)
@@ -45,6 +45,9 @@ export async function POST(request: Request) {
     console.error('[analyze] Error:', error)
 
     const message = toUserFriendlyGeminiError(error)
+
+    console.error("RAW GEMINI ERROR:", error)
+
     const raw = error instanceof Error ? error.message : ''
     const status = message.includes('GEMINI_API_KEY')
       ? 500
