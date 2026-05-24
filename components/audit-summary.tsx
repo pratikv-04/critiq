@@ -82,14 +82,14 @@ export function AuditSummary({
           <div className="h-1.5 rounded-full bg-foreground/8 overflow-hidden">
             <motion.div
               className={`h-full rounded-full ${
-                verdictScore >= 80
+                safeVerdictScore >= 80
                   ? 'bg-emerald-500'
-                  : verdictScore >= 60
+                  : safeVerdictScore >= 60
                     ? 'bg-amber-500'
                     : 'bg-orange-500'
               }`}
               initial={{ width: 0 }}
-              animate={{ width: `${verdictScore}%` }}
+              animate={{ width: `${safeVerdictScore}%` }}
               transition={{ duration: 1.2, delay: 0.3, ease: easePremium }}
             />
           </div>
