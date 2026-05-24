@@ -25,14 +25,14 @@ export function AuditSummary({
   screenshotUrl,
   isRoastMode,
   headline,
-  safeVerdictScore,
+  verdictScore,
 }: AuditSummaryProps) {
-  const safeVerdictScore = Number.isFinite(Number(safeVerdictScore))
-  ? Number(safeVerdictScore)
-  : 72
+  const safeVerdictScore = Number.isFinite(Number(verdictScore))
+    ? Number(verdictScore)
+    : 72
 
-const animatedOverall = useAnimatedScore(safeVerdictScore, 1600, 200)
-const grade = getGrade(safeVerdictScore)
+  const animatedOverall = useAnimatedScore(safeVerdictScore, 1600, 200)
+  const grade = getGrade(safeVerdictScore)
 
   return (
     <motion.div
