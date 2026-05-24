@@ -1,7 +1,12 @@
-import { SchemaType, type ResponseSchema } from '@google/generative-ai'
+const SchemaType = {
+  OBJECT: 'object',
+  ARRAY: 'array',
+  STRING: 'string',
+  INTEGER: 'integer',
+}
 
 /** Gemini responseSchema — enforces consistent JSON shape. */
-export const AUDIT_RESPONSE_SCHEMA: ResponseSchema = {
+export const AUDIT_RESPONSE_SCHEMA =
   type: SchemaType.OBJECT,
   properties: {
     scorecards: {
