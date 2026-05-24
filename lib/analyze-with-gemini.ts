@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import OpenAI from 'openai'
 import { AUDIT_RESPONSE_SCHEMA } from '@/lib/audit-response-schema'
 import { normalizeAuditResponse } from '@/lib/normalize-audit-response'
 import { buildSystemPrompt, buildUserPrompt } from '@/lib/prompts'
@@ -13,10 +13,10 @@ export interface AnalyzeImageOptions {
 }
 
 function getApiKey(): string {
-  const key = process.env.GEMINI_API_KEY?.trim()
+  const key = process.env.OPENROUTER_API_KEY?.trim()
 
   if (!key) {
-    throw new Error('GEMINI_API_KEY is not configured')
+    throw new Error('OPENROUTER_API_KEY is not configured')
   }
 
   return key
