@@ -65,8 +65,6 @@ export async function POST(request: Request) {
 
     const message = toUserFriendlyGeminiError(error)
 
-    console.error("FULL GEMINI ERROR:", JSON.stringify(error, null, 2))
-
     const raw =
       error instanceof Error
         ? error.message.toLowerCase()
