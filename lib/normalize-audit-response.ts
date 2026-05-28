@@ -102,7 +102,9 @@ export function normalizeAuditResponse(raw: GeminiAuditResponse): GeminiAuditRes
   
   const calculatedScore = calculateVerdictScore(normalizedScorecards)
 
-  const verdictScore = clampScore(calculatedScore || 50)
+  const verdictScore = Number.isFinite(calculatedScore)
+  ? calculatedScore
+  : 50
 
   return {
     scorecards: normalizedScorecards,
