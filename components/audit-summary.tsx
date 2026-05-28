@@ -28,8 +28,8 @@ export function AuditSummary({
   verdictScore,
 }: AuditSummaryProps) {
   const safeVerdictScore = Number.isFinite(Number(verdictScore))
-    ? Number(verdictScore)
-    : 72
+  ? Number(verdictScore)
+  : 50
 
   const animatedOverall = useAnimatedScore(safeVerdictScore, 1600, 200)
   const grade = getGrade(safeVerdictScore)

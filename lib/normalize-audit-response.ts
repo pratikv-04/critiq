@@ -57,9 +57,13 @@ function normalizeScorecards(scorecards: ScorecardData[]): ScorecardData[] {
     // Clamp to 0‑100 with two‑decimal precision.
     const variance = Math.floor(Math.random() * 9) - 4
 
-    const finalScore = clampScore(
-      Math.round(rawScore + variance)
-    )
+    const safeScore = Number(rawScore)
+
+const finalScore = clampScore(
+  Number.isFinite(safeScore)
+    ? Math.round(safeScore + variance)
+    : 50
+)
     return {
       name,
       score: finalScore,
@@ -98,9 +102,7 @@ export function normalizeAuditResponse(raw: GeminiAuditResponse): GeminiAuditRes
   
   const calculatedScore = calculateVerdictScore(normalizedScorecards)
 
-const verdictScore = Number.isFinite(calculatedScore)
-  ? calculatedScore
-  : 72
+  const verdictScore = clampScore(calculatedScore || 50)
 
   return {
     scorecards: normalizedScorecards,
