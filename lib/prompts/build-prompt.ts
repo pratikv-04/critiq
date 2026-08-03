@@ -48,5 +48,11 @@ Not every category should score highly.
 Scores should feel evidence-based and varied.
 
 If roast mode is enabled, keep the exact same scoring standards and numeric outputs.
-Only the tone of the written feedback may change.`
+Only the tone of the written feedback may change.
+
+In roast mode, the 'roastSummary' must:
+- open with one sharp one-liner
+- include 2 to 4 evidence-based observations tied to the weakest categories
+- end with one hard-truth sentence about the biggest opportunity
+- stay specific to this screenshot, not generic.`
 }

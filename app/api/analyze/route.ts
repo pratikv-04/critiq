@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { analyzeImageWithGemini } from '@/lib/analyze-with-gemini'
+import { analyzeImage } from '@/lib/analyze-image'
 import { toUserFriendlyGeminiError } from '@/lib/gemini-errors'
 
 export const runtime = 'nodejs'
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
     const buffer = Buffer.from(arrayBuffer)
 
-    const audit = await analyzeImageWithGemini(
+    const audit = await analyzeImage(
       buffer,
       file.type,
       { roastMode }

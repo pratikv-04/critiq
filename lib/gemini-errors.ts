@@ -1,20 +1,22 @@
 /**
- * Turns raw Google Generative AI / Gemini API errors into user-friendly messages.
+ * Turns raw provider-layer AI errors into user-friendly messages.
  */
 export function toUserFriendlyGeminiError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error)
 
-  if (message.includes('GEMINI_API_KEY')) {
+  if (message.includes('GEMINI_API_KEY') || message.includes('OPENROUTER_API_KEY')) {
     return 'The critique engine requires an API key to function. Please verify your configuration.'
   }
 
-  // Quota / rate limit / 503
+  // Quota / rate limit / provider overload
   if (
     message.includes('429') ||
     message.includes('quota') ||
     message.includes('Quota exceeded') ||
     message.includes('503') ||
-    message.includes('overload')
+    message.includes('overload') ||
+    message.includes('insufficient credits') ||
+    message.includes('provider unavailable')
   ) {
     return 'The critique engine is currently under heavy load. Give it another shot in a few seconds.'
   }
@@ -50,7 +52,13 @@ export function toUserFriendlyGeminiError(error: unknown): string {
     return 'The critique engine could not read this image. Please try a clear PNG or JPG screenshot.'
   }
   
-  if (message.includes('timeout') || message.includes('AbortError')) {
+  if (
+    message.includes('timeout') ||
+    message.includes('AbortError') ||
+    message.includes('network') ||
+    message.includes('fetch failed') ||
+    message.includes('ENOTFOUND')
+  ) {
     return 'The analysis took too long to complete. Please try again in a moment.'
   }
 
