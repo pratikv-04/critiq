@@ -10,7 +10,7 @@ interface AuditSummaryProps {
   screenshotUrl: string
   isRoastMode: boolean
   headline?: string
-  safeVerdictScore: number
+  verdictScore: number
 }
 
 function getGrade(score: number): { label: string; description: string } {

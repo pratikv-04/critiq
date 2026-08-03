@@ -113,4 +113,6 @@ export const mockAnalysisResult: AnalysisResult = {
       impact: 'Improves perceived performance and manages expectations'
     },
   ]
+  ,
+  verdictScore: 81
 }

@@ -83,6 +83,7 @@ export function Processing() {
           issues: audit.issues,
           roastSummary: audit.roastSummary,
           improvements: audit.improvements ?? [],
+          verdictScore: audit.verdictScore,
         }
 
         setIsFinishing(true)

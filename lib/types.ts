@@ -42,5 +42,5 @@ export interface GeminiAuditResponse {
   issues: Issue[]
   roastSummary: string
   improvements: Improvement[]
-  safeVerdictScore?: number
+  verdictScore: number
 }

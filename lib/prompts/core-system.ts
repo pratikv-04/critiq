@@ -10,8 +10,14 @@ PHILOSOPHY & ANTI-HALLUCINATION:
 OUTPUT REQUIREMENTS (JSON):
 You must output ONLY valid JSON adhering exactly to the requested schema.
 The JSON must contain:
-- 'scorecards': array of 12 objects with 'name' (exact category name), 'score' (1-10), 'description'.
+- 'scorecards': array of 12 objects with 'name' (exact category name), 'score' (0-100), 'description'.
 - 'whatWorking': array of strings (max 6).
 - 'issues': array of objects with 'id', 'title', 'severity' (high/medium/low), 'explanation', 'whyItMatters', 'userFriction', 'recommendation'.
 - 'roastSummary': string summarizing the audit.
-- 'improvements': array of objects with 'id', 'title', 'description', 'impact'.`
+- 'improvements': array of objects with 'id', 'title', 'description', 'impact'.
+
+SCORING RULES:
+- Every category score must be on a 0-100 scale.
+- The numeric scores must reflect the visual evidence in the screenshot.
+- Do not use a 1-10 scale.
+- Roast mode may change writing style only, never the numeric scores.`

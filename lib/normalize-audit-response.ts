@@ -39,34 +39,28 @@ function clampScore(score: number): number {
   return Number(clamped.toFixed(2))
 }
 
+function normalizeCategoryScore(rawScore: unknown): number {
+  const numericScore = Number(rawScore)
+
+  if (!Number.isFinite(numericScore) || numericScore < 0) {
+    return 50
+  }
+
+  if (numericScore <= 10) {
+    return clampScore(numericScore * 10)
+  }
+
+  return clampScore(numericScore)
+}
+
 function normalizeScorecards(scorecards: ScorecardData[]): ScorecardData[] {
   const byName = new Map(scorecards.map((s) => [s.name, s]))
 
   return REQUIRED_SCORECARD_NAMES.map((name) => {
     const existing = byName.get(name)
-    // Pull raw score; default to a neutral 50 if missing or invalid.
-    let rawScore: number | undefined = existing?.score
-    if (rawScore === undefined || rawScore === null) {
-      rawScore = 50
-    } else {
-      rawScore = Number(rawScore)
-      if (!Number.isFinite(rawScore) || rawScore < 0) {
-        rawScore = 50
-      }
-    }
-    // Clamp to 0‑100 with two‑decimal precision.
-    const variance = Math.floor(Math.random() * 9) - 4
-
-    const safeScore = Number(rawScore)
-
-const finalScore = clampScore(
-  Number.isFinite(safeScore)
-    ? Math.round(safeScore + variance)
-    : 50
-)
     return {
       name,
-      score: finalScore,
+      score: normalizeCategoryScore(existing?.score),
       description: existing?.description?.trim() || 'Insufficient detail from analysis.',
     }
   })
@@ -151,5 +145,4 @@ function normalizeIssue(issue: Issue, index: number): Issue {
     recommendation: issue.recommendation?.trim() || '',
   }
 }
-
 

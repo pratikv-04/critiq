@@ -34,7 +34,7 @@ Analyze this UI screenshot. Produce a rigorous UX audit as JSON.
 Follow this sequence:
 1. Identify interface type and primary user job-to-be-done.
 2. Trace visual hierarchy.
-3. Score each of the 12 categories honestly.
+3. Score each of the 12 categories honestly on a 0-100 scale.
 4. Document specific, evidence-based issues and clear improvements.
 
 Return the complete JSON object now.
@@ -45,5 +45,8 @@ Use nuanced realistic scoring such as:
 67, 72, 74, 81, 84, 88, etc.
 
 Not every category should score highly.
-Scores should feel evidence-based and varied.`
+Scores should feel evidence-based and varied.
+
+If roast mode is enabled, keep the exact same scoring standards and numeric outputs.
+Only the tone of the written feedback may change.`
 }
