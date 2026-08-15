@@ -11,9 +11,17 @@ export const metadata: Metadata = {
   title: 'Critiq — AI UX Audit',
   description: 'Get brutally honest UX feedback from AI. Upload any interface and get actionable insights.',
   generator: 'v0.app',
+  manifest: '/manifest.webmanifest',
   icons: {
-    icon: '/favicon.png',
-    apple: '/apple-icon.png',
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.png', sizes: '1024x1024', type: 'image/png' },
+    ],
+    shortcut: '/favicon-32x32.png',
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
 }
 
