@@ -9,7 +9,7 @@ export interface AnalyzeImageOptions {
 
 const GROQ_MODEL = 'qwen/qwen3.8-27b'
 const GENERATION_TEMPERATURE = 0.2
-const MAX_OUTPUT_TOKENS = 2500
+const MAX_OUTPUT_TOKENS = 800
 
 function getGroqApiKey(): string {
   const key = process.env.GROQ_API_KEY?.trim()

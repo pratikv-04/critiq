@@ -39,6 +39,8 @@ Follow this sequence:
 
 Return the complete JSON object now.
 
+Keep the response concise enough to fit the output limit. Use short, specific sentences in every description, issue, and improvement while preserving every required JSON field.
+
 Avoid overly rounded scores like 70, 80, and 90 unless strongly justified.
 
 Use nuanced realistic scoring such as:
