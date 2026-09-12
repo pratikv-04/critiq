@@ -190,7 +190,7 @@ export function Results() {
         </RevealSection>
 
         {/* 6. Roast */}
-        {isRoastMode && (
+        {isRoastMode && analysisResult.roastSummary.trim() && (
           <RevealSection delay={RESULTS_REVEAL.roast} className="mb-14 sm:mb-16">
             <RoastCard roast={analysisResult.roastSummary} />
           </RevealSection>

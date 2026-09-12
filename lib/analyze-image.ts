@@ -16,6 +16,31 @@ export interface AnalyzeImageOptions {
 const GROQ_MODEL = 'qwen/qwen3.8-27b'
 const GENERATION_TEMPERATURE = 0.2
 const MAX_OUTPUT_TOKENS = 800
+const MAX_GROQ_ATTEMPTS = 3
+
+function getGroqStatus(error: unknown): number | null {
+  const status = (error as { status?: unknown }).status
+  const numericStatus = typeof status === 'number' ? status : Number(status)
+  return Number.isFinite(numericStatus) ? numericStatus : null
+}
+
+function getRetryReason(error: unknown, status: number | null): string {
+  const message = String((error as { message?: unknown }).message ?? '').toLowerCase()
+  if (message.includes('capacity') || message.includes('over capacity')) {
+    return 'provider_over_capacity'
+  }
+  if (status === 429) return 'rate_limit'
+  return `transient_http_${status ?? 'unknown'}`
+}
+
+function isRetryableGroqError(error: unknown): boolean {
+  const status = getGroqStatus(error)
+  return status === 429 || status === 502 || status === 503 || status === 504
+}
+
+function waitForRetry(attempt: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** (attempt - 1)))
+}
 
 function getGroqApiKey(): string {
   const key = process.env.GROQ_API_KEY?.trim()
@@ -96,39 +121,64 @@ export async function analyzeImage(
   })
 
   let response
+  const request = {
+    model: GROQ_MODEL,
+    temperature: GENERATION_TEMPERATURE,
+    max_completion_tokens: MAX_OUTPUT_TOKENS,
+    reasoning_effort: 'none' as const,
+    response_format: { type: 'json_object' as const },
+    messages: [
+      {
+        role: 'system' as const,
+        content: buildSystemPrompt({ roastMode }),
+      },
+      {
+        role: 'user' as const,
+        content: [
+          {
+            type: 'text' as const,
+            text: buildUserPrompt({ roastMode }),
+          },
+          {
+            type: 'image_url' as const,
+            image_url: {
+              url: `data:${mimeType};base64,${imageBuffer.toString('base64')}`,
+            },
+          },
+        ],
+      },
+    ],
+  }
 
-  try {
-    response = await client.chat.completions.create({
-      model: GROQ_MODEL,
-      temperature: GENERATION_TEMPERATURE,
-      max_completion_tokens: MAX_OUTPUT_TOKENS,
-      reasoning_effort: 'none',
-      response_format: { type: 'json_object' },
-      messages: [
-        {
-          role: 'system',
-          content: buildSystemPrompt({ roastMode }),
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: buildUserPrompt({ roastMode }),
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:${mimeType};base64,${imageBuffer.toString('base64')}`,
-              },
-            },
-          ],
-        },
-      ],
-    })
-  } catch (error) {
-    logGroqApiError(error)
-    throw error
+  for (let attempt = 1; attempt <= MAX_GROQ_ATTEMPTS; attempt += 1) {
+    try {
+      response = await client.chat.completions.create(request)
+      console.info('[Critiq Groq Request]', {
+        attempt,
+        status: 200,
+      })
+      break
+    } catch (error) {
+      const status = getGroqStatus(error)
+      const canRetry = isRetryableGroqError(error) && attempt < MAX_GROQ_ATTEMPTS
+
+      if (!canRetry) {
+        logGroqApiError(error)
+        throw error
+      }
+
+      console.warn('[Critiq Groq Retry]', {
+        attempt: attempt + 1,
+        maxAttempts: MAX_GROQ_ATTEMPTS,
+        status,
+        reason: getRetryReason(error, status),
+      })
+      await waitForRetry(attempt)
+    }
+  }
+
+  if (!response) {
+    throw new Error('Groq did not return a response')
   }
 
   const text = response.choices[0]?.message?.content
