@@ -39,14 +39,16 @@ Follow this sequence:
 
 Return the complete JSON object now.
 
-Keep the response concise enough to fit the output limit. Use short, specific sentences in every description, issue, and improvement while preserving every required JSON field.
+Keep the response concise enough to fit the 800-token output limit. Scorecard descriptions must be very short, ideally 8-14 words. Use short, specific sentences in every field.
 
 Return only this JSON object, with no markdown, code fences, commentary, or extra properties:
-- scorecards: exactly 12 objects, in the requested category order; each has name, score, description.
-- whatWorking: 1 to 3 concise strings.
-- issues: 1 to 2 concise objects, each with id, title, severity, explanation, whyItMatters, userFriction, recommendation.
-- roastSummary: one concise string.
-- improvements: 1 to 2 concise objects, each with id, title, description, impact.
+- scorecards: exactly 12 objects, in the requested category order; each must contain name, score, description.
+- whatWorking: always include this array, with at most 3 concise strings.
+- issues: always include this array, with at most 3 concise objects; each must contain id, title, severity, explanation, whyItMatters, userFriction, recommendation.
+- roastSummary: always include this string; use an empty string in standard mode if needed.
+- improvements: always include this array, with at most 3 concise objects; each must contain id, title, description, impact.
+
+Complete EVERY required property. Never omit a field to save tokens. Prioritize completing the JSON structure over adding detail. Do not add keys such as verdictScore.
 
 Avoid overly rounded scores like 70, 80, and 90 unless strongly justified.
 

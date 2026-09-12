@@ -26,79 +26,6 @@ const SCORECARD_NAMES = [
   'Product Maturity',
 ] as const
 
-const CRITIQ_RESPONSE_SCHEMA = {
-  type: 'object',
-  additionalProperties: false,
-  properties: {
-    scorecards: {
-      type: 'array',
-      minItems: 12,
-      maxItems: 12,
-      items: {
-        type: 'object',
-        additionalProperties: false,
-        properties: {
-          name: { type: 'string', enum: SCORECARD_NAMES },
-          score: { type: 'number', minimum: 0, maximum: 100 },
-          description: { type: 'string' },
-        },
-        required: ['name', 'score', 'description'],
-      },
-    },
-    whatWorking: {
-      type: 'array',
-      minItems: 1,
-      maxItems: 6,
-      items: { type: 'string' },
-    },
-    issues: {
-      type: 'array',
-      minItems: 1,
-      maxItems: 8,
-      items: {
-        type: 'object',
-        additionalProperties: false,
-        properties: {
-          id: { type: 'string' },
-          title: { type: 'string' },
-          severity: { type: 'string', enum: ['high', 'medium', 'low'] },
-          explanation: { type: 'string' },
-          whyItMatters: { type: 'string' },
-          userFriction: { type: 'string' },
-          recommendation: { type: 'string' },
-        },
-        required: [
-          'id',
-          'title',
-          'severity',
-          'explanation',
-          'whyItMatters',
-          'userFriction',
-          'recommendation',
-        ],
-      },
-    },
-    roastSummary: { type: 'string' },
-    improvements: {
-      type: 'array',
-      minItems: 1,
-      maxItems: 6,
-      items: {
-        type: 'object',
-        additionalProperties: false,
-        properties: {
-          id: { type: 'string' },
-          title: { type: 'string' },
-          description: { type: 'string' },
-          impact: { type: 'string' },
-        },
-        required: ['id', 'title', 'description', 'impact'],
-      },
-    },
-  },
-  required: ['scorecards', 'whatWorking', 'issues', 'roastSummary', 'improvements'],
-} as const
-
 function getGroqApiKey(): string {
   const key = process.env.GROQ_API_KEY?.trim()
 
@@ -139,6 +66,50 @@ function inspectAuditStructure(value: unknown) {
     if (!Array.isArray(record.issues)) typeMismatches.push('issues: array')
     if (typeof record.roastSummary !== 'string') typeMismatches.push('roastSummary: string')
     if (!Array.isArray(record.improvements)) typeMismatches.push('improvements: array')
+
+    if (Array.isArray(record.scorecards)) {
+      record.scorecards.forEach((scorecard, index) => {
+        if (!scorecard || typeof scorecard !== 'object') {
+          typeMismatches.push(`scorecards[${index}]: object`)
+          return
+        }
+        const item = scorecard as Record<string, unknown>
+        for (const field of ['name', 'score', 'description']) {
+          if (!(field in item)) missingRequiredFields.push(`scorecards[${index}].${field}`)
+        }
+        if (typeof item.name !== 'string') typeMismatches.push(`scorecards[${index}].name: string`)
+        if (typeof item.score !== 'number') typeMismatches.push(`scorecards[${index}].score: number`)
+        if (typeof item.description !== 'string') typeMismatches.push(`scorecards[${index}].description: string`)
+      })
+    }
+
+    if (Array.isArray(record.issues)) {
+      record.issues.forEach((issue, index) => {
+        if (!issue || typeof issue !== 'object') {
+          typeMismatches.push(`issues[${index}]: object`)
+          return
+        }
+        const item = issue as Record<string, unknown>
+        for (const field of ['id', 'title', 'severity', 'explanation', 'whyItMatters', 'userFriction', 'recommendation']) {
+          if (!(field in item)) missingRequiredFields.push(`issues[${index}].${field}`)
+          else if (typeof item[field] !== 'string') typeMismatches.push(`issues[${index}].${field}: string`)
+        }
+      })
+    }
+
+    if (Array.isArray(record.improvements)) {
+      record.improvements.forEach((improvement, index) => {
+        if (!improvement || typeof improvement !== 'object') {
+          typeMismatches.push(`improvements[${index}]: object`)
+          return
+        }
+        const item = improvement as Record<string, unknown>
+        for (const field of ['id', 'title', 'description', 'impact']) {
+          if (!(field in item)) missingRequiredFields.push(`improvements[${index}].${field}`)
+          else if (typeof item[field] !== 'string') typeMismatches.push(`improvements[${index}].${field}: string`)
+        }
+      })
+    }
   } else {
     typeMismatches.push('top-level: object')
   }
@@ -226,6 +197,14 @@ function validateAuditStructure(value: unknown): GeminiAuditResponse {
     throw new Error('AI response has invalid scorecards')
   }
 
+  if (
+    (record.whatWorking as unknown[]).length > 3 ||
+    (record.issues as unknown[]).length > 3 ||
+    (record.improvements as unknown[]).length > 3
+  ) {
+    throw new Error('AI response exceeds compact field limits')
+  }
+
   return value as GeminiAuditResponse
 }
 
@@ -248,14 +227,7 @@ export async function analyzeImage(
       temperature: GENERATION_TEMPERATURE,
       max_completion_tokens: MAX_OUTPUT_TOKENS,
       reasoning_effort: 'none',
-      response_format: {
-        type: 'json_schema',
-        json_schema: {
-          name: 'critiq_audit',
-          strict: true,
-          schema: CRITIQ_RESPONSE_SCHEMA,
-        },
-      },
+      response_format: { type: 'json_object' },
       messages: [
         {
           role: 'system',
