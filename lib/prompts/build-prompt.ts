@@ -45,10 +45,10 @@ Return only this JSON object, with no markdown, code fences, commentary, or extr
 - scorecards: exactly 12 objects, in the requested category order; each must contain name, score, description.
 - whatWorking: always include this array, with at most 3 concise strings.
 - issues: always include this array, with at most 3 concise objects; each must contain id, title, severity, explanation, whyItMatters, userFriction, recommendation.
-- roastSummary: always include this string; use an empty string in standard mode if needed.
+- roastSummary: always include this non-empty string, in both standard and roast modes.
 - improvements: always include this array, with at most 3 concise objects; each must contain id, title, description, impact.
 
-Complete EVERY required property, including roastSummary and improvements. Never omit a field to save tokens: if there is nothing to report, return roastSummary as "" and improvements as []. Prioritize completing the JSON structure over adding detail. Do not add keys such as verdictScore.
+Complete EVERY required property, including roastSummary and improvements. Never omit a field to save tokens. roastSummary is required even in standard mode and must contain a concise, evidence-based 1-3 sentence summary; improvements may be [] only when there are no concise improvements to report. Prioritize completing the JSON structure over adding detail. Do not add keys such as verdictScore.
 
 Avoid overly rounded scores like 70, 80, and 90 unless strongly justified.
 
@@ -61,7 +61,7 @@ Scores should feel evidence-based and varied.
 If roast mode is enabled, keep the exact same scoring standards and numeric outputs.
 Only the tone of the written feedback may change.
 
-In roast mode, the 'roastSummary' is mandatory and must never be empty. Write 1-3 concise sentences that are witty, playful, direct, and specific to this screenshot. It must:
+The 'roastSummary' is mandatory in every mode and must never be empty. Write 1-3 concise sentences that are witty, playful, direct, and specific to this screenshot. In standard mode, keep the same evidence-based roast available for a later Roast toggle; in roast mode, make the tone sharper while staying accurate. It must:
 - open with one sharp one-liner
 - include 2 to 4 evidence-based observations tied to the weakest categories
 - end with one hard-truth sentence about the biggest opportunity

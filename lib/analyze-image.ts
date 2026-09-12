@@ -141,7 +141,7 @@ export async function analyzeImage(
 
   try {
     const validated = validateAuditStructure(parseAuditJson(text))
-    return normalizeAuditResponse(completeOptionalAuditFields(validated, roastMode))
+    return normalizeAuditResponse(completeOptionalAuditFields(validated))
   } catch (error) {
     logGroqParseError(error, text)
     throw error

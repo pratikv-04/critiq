@@ -48,8 +48,7 @@ function buildRoastSummary(
 }
 
 export function completeOptionalAuditFields(
-  raw: GeminiAuditResponse,
-  roastMode: boolean
+  raw: GeminiAuditResponse
 ): GeminiAuditResponse {
   const record = raw as unknown as Record<string, unknown>
   const issues = raw.issues
@@ -62,9 +61,7 @@ export function completeOptionalAuditFields(
   const returnedRoast = typeof record.roastSummary === 'string'
     ? record.roastSummary.trim()
     : ''
-  const roastSummary = returnedRoast || (roastMode
-    ? buildRoastSummary(raw.scorecards, issues)
-    : '')
+  const roastSummary = returnedRoast || buildRoastSummary(raw.scorecards, issues)
 
   return {
     ...raw,
