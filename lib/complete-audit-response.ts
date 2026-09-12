@@ -1,10 +1,7 @@
 import type { GeminiAuditResponse, Improvement, Issue } from '@/lib/types'
 
-export type RoastSource = 'groq' | 'not-requested'
-
 export interface CompletedAuditResponse {
   response: GeminiAuditResponse
-  roastSource: RoastSource
   roastPresent: boolean
 }
 
@@ -30,8 +27,7 @@ function buildImprovements(issues: Issue[]): Improvement[] {
 }
 
 export function completeOptionalAuditFields(
-  raw: GeminiAuditResponse,
-  roastMode: boolean
+  raw: GeminiAuditResponse
 ): CompletedAuditResponse {
   const record = raw as unknown as Record<string, unknown>
   const issues = raw.issues
@@ -44,7 +40,6 @@ export function completeOptionalAuditFields(
   const returnedRoast = typeof record.roastSummary === 'string'
     ? record.roastSummary.trim()
     : ''
-  const roastSource: RoastSource = roastMode ? 'groq' : 'not-requested'
 
   return {
     response: {
@@ -52,7 +47,6 @@ export function completeOptionalAuditFields(
       roastSummary: returnedRoast,
       improvements,
     },
-    roastSource,
     roastPresent: returnedRoast.length > 0,
   }
 }

@@ -26,8 +26,13 @@ export function buildUserPrompt(options: BuildPromptOptions): string {
   const modeLabel = options.roastMode
     ? 'ROAST MODE is ON — deliver witty, sarcastic critique alongside the audit.'
     : 'STANDARD MODE — deliver a professional product design critique.'
+  const roastRequirement = options.roastMode
+    ? 'ROAST MODE REQUIREMENT: Return one JSON object with required top-level keys scorecards, whatWorking, issues, improvements, and roastSummary. roastSummary MUST be a non-empty string. Do not omit it, return null, return an empty string, use markdown, or add commentary outside JSON.'
+    : 'STANDARD MODE: Do not generate roast copy; roastSummary may be omitted or empty.'
 
   return `${modeLabel}
+
+${roastRequirement}
 
 Analyze this UI screenshot. Produce a rigorous UX audit as JSON.
 

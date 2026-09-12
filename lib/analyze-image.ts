@@ -16,6 +16,7 @@ export interface AnalyzeImageOptions {
 const GROQ_MODEL = 'qwen/qwen3.8-27b'
 const GENERATION_TEMPERATURE = 0.2
 const MAX_OUTPUT_TOKENS = 800
+const ROAST_RECOVERY_TOKENS = 120
 const MAX_GROQ_ATTEMPTS = 3
 
 function getGroqStatus(error: unknown): number | null {
@@ -40,6 +41,19 @@ function isRetryableGroqError(error: unknown): boolean {
 
 function waitForRetry(attempt: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** (attempt - 1)))
+}
+
+function getRoastSummary(value: unknown): string {
+  if (!value || typeof value !== 'object') return ''
+
+  const record = value as Record<string, unknown>
+  const direct = [record.roastSummary, record.roast_summary]
+  const nested = record.roast && typeof record.roast === 'object'
+    ? [(record.roast as Record<string, unknown>).summary]
+    : []
+  const candidate = [...direct, ...nested].find((item) => typeof item === 'string')
+
+  return typeof candidate === 'string' ? candidate.trim() : ''
 }
 
 function getGroqApiKey(): string {
@@ -107,6 +121,79 @@ function logGroqParseError(error: unknown, responseText: string) {
     responseTextLength: responseText.length,
     ...structure,
   })
+}
+
+async function recoverRoastSummary(
+  client: OpenAI,
+  imageBuffer: Buffer,
+  mimeType: string,
+  audit: GeminiAuditResponse
+): Promise<string> {
+  const auditContext = JSON.stringify({
+    scorecards: audit.scorecards,
+    issues: audit.issues,
+    improvements: audit.improvements,
+    whatWorking: audit.whatWorking,
+  })
+
+  let response
+
+  try {
+    response = await client.chat.completions.create({
+      model: GROQ_MODEL,
+      temperature: GENERATION_TEMPERATURE,
+      max_completion_tokens: ROAST_RECOVERY_TOKENS,
+      reasoning_effort: 'none',
+      response_format: { type: 'json_object' },
+      messages: [
+        {
+          role: 'system',
+          content: 'Return only valid JSON with exactly one key: roastSummary. The value must be a non-empty, witty, screenshot-specific 1-3 sentence roast. Roast the interface, never the designer. Do not mention scores unless they support a concrete visible observation.',
+        },
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `Generate the missing roastSummary for the current screenshot using the audit context below. Reference concrete visible UI details and the actual issues. Do not use a generic formula or markdown. Return only {"roastSummary":"..."}.\n\nAudit context:\n${auditContext}`,
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:${mimeType};base64,${imageBuffer.toString('base64')}`,
+              },
+            },
+          ],
+        },
+      ],
+    })
+  } catch (error) {
+    logGroqApiError(error)
+    throw error
+  }
+
+  console.info('[Critiq Groq Recovery Request]', {
+    status: 200,
+    maxCompletionTokens: ROAST_RECOVERY_TOKENS,
+  })
+
+  const text = response.choices[0]?.message?.content
+  if (!text || typeof text !== 'string') {
+    const error = new Error('Groq roast recovery returned an empty response')
+    logGroqParseError(error, '')
+    throw error
+  }
+
+  try {
+    const roastSummary = getRoastSummary(parseAuditJson(text))
+    if (!roastSummary) {
+      throw new Error('Groq roast recovery is missing roastSummary')
+    }
+    return roastSummary
+  } catch (error) {
+    logGroqParseError(error, text)
+    throw error
+  }
 }
 
 export async function analyzeImage(
@@ -190,17 +277,39 @@ export async function analyzeImage(
   }
 
   try {
-    const validated = validateAuditStructure(parseAuditJson(text))
-    const completed = completeOptionalAuditFields(validated, roastMode)
+    const parsed = parseAuditJson(text)
+    const validated = validateAuditStructure(parsed)
+    const completed = completeOptionalAuditFields({
+      ...validated,
+      roastSummary: getRoastSummary(parsed),
+    })
 
     console.info('[Critiq Roast Source]', {
-      source: completed.roastSource,
+      source: roastMode
+        ? completed.roastPresent ? 'groq-primary' : 'groq'
+        : 'not-requested',
       modelRequested: GROQ_MODEL,
       roastPresent: completed.roastPresent,
     })
 
     if (roastMode && !completed.roastPresent) {
-      throw new Error('Groq response is missing roastSummary in roast mode')
+      const recovery = await recoverRoastSummary(
+        client,
+        imageBuffer,
+        mimeType,
+        completed.response
+      )
+
+      console.info('[Critiq Roast Source]', {
+        source: 'groq-recovery',
+        modelRequested: GROQ_MODEL,
+        roastPresent: true,
+      })
+
+      return normalizeAuditResponse({
+        ...completed.response,
+        roastSummary: recovery,
+      })
     }
 
     return normalizeAuditResponse(completed.response)
