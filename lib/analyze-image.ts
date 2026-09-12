@@ -141,12 +141,17 @@ export async function analyzeImage(
 
   try {
     const validated = validateAuditStructure(parseAuditJson(text))
-    const completed = completeOptionalAuditFields(validated)
+    const completed = completeOptionalAuditFields(validated, roastMode)
 
     console.info('[Critiq Roast Source]', {
       source: completed.roastSource,
       modelRequested: GROQ_MODEL,
+      roastPresent: completed.roastPresent,
     })
+
+    if (roastMode && !completed.roastPresent) {
+      throw new Error('Groq response is missing roastSummary in roast mode')
+    }
 
     return normalizeAuditResponse(completed.response)
   } catch (error) {

@@ -13,7 +13,7 @@ The JSON must contain:
 - 'scorecards': array of 12 objects with 'name' (exact category name), 'score' (0-100), 'description'.
 - 'whatWorking': array of strings (max 6).
 - 'issues': array of objects with 'id', 'title', 'severity' (high/medium/low), 'explanation', 'whyItMatters', 'userFriction', 'recommendation'.
-- 'roastSummary': string summarizing the audit.
+- When Roast Mode is requested, include a concise non-empty 'roastSummary' based on visible screenshot evidence; otherwise omit it or return an empty string.
 - 'improvements': array of objects with 'id', 'title', 'description', 'impact'.
 
 SCORING RULES:

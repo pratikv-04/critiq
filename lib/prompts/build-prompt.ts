@@ -45,10 +45,10 @@ Return only this JSON object, with no markdown, code fences, commentary, or extr
 - scorecards: exactly 12 objects, in the requested category order; each must contain name, score, description.
 - whatWorking: always include this array, with at most 3 concise strings.
 - issues: always include this array, with at most 3 concise objects; each must contain id, title, severity, explanation, whyItMatters, userFriction, recommendation.
-- roastSummary: always include this non-empty string, in both standard and roast modes.
+- roastSummary: ${options.roastMode ? 'required non-empty string for Roast Mode' : 'omit this field or return an empty string; do not spend tokens on roast copy'}.
 - improvements: always include this array, with at most 3 concise objects; each must contain id, title, description, impact.
 
-Complete EVERY required property, including roastSummary and improvements. Never omit a field to save tokens. roastSummary is required even in standard mode and must contain a concise, evidence-based 1-3 sentence summary; improvements may be [] only when there are no concise improvements to report. Prioritize completing the JSON structure over adding detail. Do not add keys such as verdictScore.
+Complete EVERY required core property. Never omit a core field to save tokens. ${options.roastMode ? 'Roast Mode also requires a non-empty roastSummary.' : 'In standard mode, roastSummary is not needed.'} improvements may be [] only when there are no concise improvements to report. Prioritize completing the JSON structure over adding detail. Do not add keys such as verdictScore.
 
 Avoid overly rounded scores like 70, 80, and 90 unless strongly justified.
 
@@ -61,11 +61,5 @@ Scores should feel evidence-based and varied.
 If roast mode is enabled, keep the exact same scoring standards and numeric outputs.
 Only the tone of the written feedback may change.
 
-The 'roastSummary' is mandatory in every mode and must never be empty. Write 1-3 concise sentences that are witty, playful, direct, and specific to this screenshot, using its weakest scores, actual issue titles/details, and concrete improvement opportunities. In standard mode, keep the same evidence-based roast available for a later Roast toggle; in roast mode, make the tone sharper while staying accurate. It must:
-- open with one sharp one-liner
-- include 2 to 4 evidence-based observations tied to the weakest categories
-- end with one hard-truth sentence about the biggest opportunity
-- stay specific to this screenshot, not generic.
-- Do not use formulaic phrasing such as "X and Y are carrying the critique", "Start with X before polishing the edges", or "The design is trying to...".
-- Vary the opening and sentence rhythm naturally based on the findings.`
+${options.roastMode ? "The 'roastSummary' is mandatory and must never be empty. Write 1-3 concise sentences that are witty, playful, direct, and specific to this screenshot, using concrete visible UI observations and actual issue details rather than merely repeating scores. Roast the interface, not the designer; keep it sharp without being abusive. It must:\n- open with one sharp, screenshot-specific observation\n- connect the humor to actual visual/UI evidence and the main issues\n- end with the biggest actionable opportunity\n- stay specific to this screenshot, not generic\n- avoid formulaic phrasing such as \\\"X and Y are carrying the critique\\\", \\\"Start with X before polishing the edges\\\", or \\\"The design is trying to...\\\"\n- vary the opening and sentence rhythm naturally based on the findings." : "Do not generate roast copy in standard mode; keep the response focused on the required audit fields."}`
 }
