@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { analyzeImage } from '@/lib/analyze-image'
-import { toUserFriendlyGeminiError } from '@/lib/gemini-errors'
+import { toUserFriendlyAIError } from '@/lib/gemini-errors'
 
 export const runtime = 'nodejs'
 
@@ -61,9 +61,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json(audit)
   } catch (error) {
-    console.error('[Analyze API Error]', error)
+    console.error('[Analyze API Error]', {
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+      errorMessage: error instanceof Error ? error.message.slice(0, 500) : 'Unknown error',
+    })
 
-    const message = toUserFriendlyGeminiError(error)
+    const message = toUserFriendlyAIError(error)
 
     const raw =
       error instanceof Error
@@ -72,9 +75,12 @@ export async function POST(request: Request) {
 
     const status =
       raw.includes('429') ||
-        raw.includes('quota')
+        raw.includes('rate limit') ||
+        raw.includes('quota') ||
+        raw.includes('tokens per day') ||
+        raw.includes('tokens per minute')
         ? 429
-        : raw.includes('api key')
+        : raw.includes('api key') || raw.includes('groq_api_key')
           ? 500
           : 502
 
