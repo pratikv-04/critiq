@@ -10,7 +10,7 @@ export interface AnalyzeImageOptions {
 type ProviderMode = 'openrouter' | 'gemini' | 'auto'
 type ProviderName = 'openrouter' | 'gemini'
 
-const OPENROUTER_MODEL = 'openai/gpt-4o-mini'
+const OPENROUTER_MODEL = 'openrouter/free'
 const GEMINI_MODEL = 'gemini-3.5-flash'
 const GENERATION_TEMPERATURE = 0.2
 const MAX_OUTPUT_TOKENS = 2500
