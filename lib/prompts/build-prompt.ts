@@ -61,7 +61,7 @@ Scores should feel evidence-based and varied.
 If roast mode is enabled, keep the exact same scoring standards and numeric outputs.
 Only the tone of the written feedback may change.
 
-In roast mode, the 'roastSummary' must:
+In roast mode, the 'roastSummary' is mandatory and must never be empty. Write 1-3 concise sentences that are witty, playful, direct, and specific to this screenshot. It must:
 - open with one sharp one-liner
 - include 2 to 4 evidence-based observations tied to the weakest categories
 - end with one hard-truth sentence about the biggest opportunity

@@ -59,11 +59,12 @@ export function completeOptionalAuditFields(
   const improvements = returnedImprovements.length
     ? returnedImprovements
     : buildImprovements(issues)
-  const roastSummary = typeof record.roastSummary === 'string'
-    ? record.roastSummary
-    : roastMode
-      ? buildRoastSummary(raw.scorecards, issues)
-      : ''
+  const returnedRoast = typeof record.roastSummary === 'string'
+    ? record.roastSummary.trim()
+    : ''
+  const roastSummary = returnedRoast || (roastMode
+    ? buildRoastSummary(raw.scorecards, issues)
+    : '')
 
   return {
     ...raw,
