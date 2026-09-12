@@ -123,11 +123,29 @@ function logGroqParseError(error: unknown, responseText: string) {
   })
 }
 
+export type RoastGenerationContext = Pick<
+  GeminiAuditResponse,
+  'scorecards' | 'whatWorking' | 'issues' | 'improvements'
+>
+
+export async function generateRoastSummary(
+  imageBuffer: Buffer,
+  mimeType: string,
+  audit: RoastGenerationContext
+): Promise<string> {
+  const client = new OpenAI({
+    apiKey: getGroqApiKey(),
+    baseURL: 'https://api.groq.com/openai/v1',
+  })
+
+  return recoverRoastSummary(client, imageBuffer, mimeType, audit)
+}
+
 async function recoverRoastSummary(
   client: OpenAI,
   imageBuffer: Buffer,
   mimeType: string,
-  audit: GeminiAuditResponse
+  audit: RoastGenerationContext
 ): Promise<string> {
   const auditContext = JSON.stringify({
     scorecards: audit.scorecards,

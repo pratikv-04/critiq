@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { useApp } from '@/lib/app-context'
 import { useState } from 'react'
+import { useRef } from 'react'
 import { Scorecard } from './scorecard'
 import { IssueAccordion } from './issue-accordion'
 import { RoastCard } from './roast-card'
@@ -14,11 +15,92 @@ import { RESULTS_REVEAL } from '@/lib/motion'
 import { easePremium } from '@/lib/motion'
 
 export function Results() {
-  const { analysisResult, isRoastMode, setIsRoastMode, resetForNewAnalysis } = useApp()
+  const {
+    analysisResult,
+    uploadedFile,
+    isRoastMode,
+    setIsRoastMode,
+    setAnalysisResult,
+    resetForNewAnalysis,
+  } = useApp()
   const [expandedIssue, setExpandedIssue] = useState<string | null>(null)
+  const [isRoastGenerating, setIsRoastGenerating] = useState(false)
+  const [roastError, setRoastError] = useState<string | null>(null)
+  const roastRequestId = useRef(0)
 
   if (!analysisResult) {
     return null
+  }
+
+  const handleRoastToggle = async (enabled: boolean) => {
+    if (!enabled) {
+      roastRequestId.current += 1
+      setIsRoastGenerating(false)
+      setRoastError(null)
+      setIsRoastMode(false)
+      return
+    }
+
+    if (analysisResult.roastSummary.trim()) {
+      console.info('[Critiq Roast Toggle]', {
+        action: 'show-existing',
+        source: 'primary-analysis',
+      })
+      setRoastError(null)
+      setIsRoastMode(true)
+      return
+    }
+
+    if (!uploadedFile) {
+      setRoastError('The original screenshot is no longer available. Please analyze it again.')
+      setIsRoastMode(false)
+      return
+    }
+
+    const requestId = roastRequestId.current + 1
+    roastRequestId.current = requestId
+    setRoastError(null)
+    setIsRoastMode(true)
+    setIsRoastGenerating(true)
+    console.info('[Critiq Roast Toggle]', {
+      action: 'generate',
+      source: 'groq-roast-only',
+    })
+
+    try {
+      const formData = new FormData()
+      formData.append('image', uploadedFile)
+      formData.append('analysis', JSON.stringify({
+        scorecards: analysisResult.scorecards,
+        whatWorking: analysisResult.whatWorking,
+        issues: analysisResult.issues,
+        improvements: analysisResult.improvements,
+      }))
+
+      const response = await fetch('/api/roast', {
+        method: 'POST',
+        body: formData,
+      })
+      const data = await response.json()
+
+      if (!response.ok || typeof data.roastSummary !== 'string' || !data.roastSummary.trim()) {
+        throw new Error(data.error || 'Roast generation failed. Please try again.')
+      }
+
+      if (roastRequestId.current !== requestId) return
+
+      setAnalysisResult({
+        ...analysisResult,
+        roastSummary: data.roastSummary.trim(),
+      })
+      setIsRoastMode(true)
+    } catch (error) {
+      if (roastRequestId.current !== requestId) return
+      setIsRoastMode(false)
+      setRoastError(error instanceof Error ? error.message : 'Roast generation failed. Please try again.')
+    } finally {
+      if (roastRequestId.current === requestId) setIsRoastGenerating(false)
+    }
   }
 
   const summaryHeadline =
@@ -77,8 +159,14 @@ export function Results() {
             }`}
           >
             <span className="text-sm text-foreground/60">Roast</span>
-            <RoastToggle enabled={isRoastMode} onChange={setIsRoastMode} compact />
+            <RoastToggle enabled={isRoastMode} onChange={handleRoastToggle} compact />
           </motion.div>
+          {isRoastGenerating && (
+            <p className="text-xs text-foreground/45">Generating roast…</p>
+          )}
+          {roastError && (
+            <p className="text-xs text-red-600/80 max-w-xs">{roastError}</p>
+          )}
         </motion.header>
 
         {/* 1. Summary */}
@@ -190,7 +278,12 @@ export function Results() {
         </RevealSection>
 
         {/* 6. Roast */}
-        {isRoastMode && analysisResult.roastSummary.trim() && (
+        {isRoastMode && isRoastGenerating && (
+          <RevealSection delay={RESULTS_REVEAL.roast} className="mb-14 sm:mb-16">
+            <p className="text-sm text-foreground/50">Generating your screenshot-specific roast…</p>
+          </RevealSection>
+        )}
+        {isRoastMode && !isRoastGenerating && analysisResult.roastSummary.trim() && (
           <RevealSection delay={RESULTS_REVEAL.roast} className="mb-14 sm:mb-16">
             <RoastCard roast={analysisResult.roastSummary} />
           </RevealSection>
