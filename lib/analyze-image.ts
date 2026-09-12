@@ -141,7 +141,14 @@ export async function analyzeImage(
 
   try {
     const validated = validateAuditStructure(parseAuditJson(text))
-    return normalizeAuditResponse(completeOptionalAuditFields(validated))
+    const completed = completeOptionalAuditFields(validated)
+
+    console.info('[Critiq Roast Source]', {
+      source: completed.roastSource,
+      modelRequested: GROQ_MODEL,
+    })
+
+    return normalizeAuditResponse(completed.response)
   } catch (error) {
     logGroqParseError(error, text)
     throw error

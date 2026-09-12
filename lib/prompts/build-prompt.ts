@@ -61,9 +61,11 @@ Scores should feel evidence-based and varied.
 If roast mode is enabled, keep the exact same scoring standards and numeric outputs.
 Only the tone of the written feedback may change.
 
-The 'roastSummary' is mandatory in every mode and must never be empty. Write 1-3 concise sentences that are witty, playful, direct, and specific to this screenshot. In standard mode, keep the same evidence-based roast available for a later Roast toggle; in roast mode, make the tone sharper while staying accurate. It must:
+The 'roastSummary' is mandatory in every mode and must never be empty. Write 1-3 concise sentences that are witty, playful, direct, and specific to this screenshot, using its weakest scores, actual issue titles/details, and concrete improvement opportunities. In standard mode, keep the same evidence-based roast available for a later Roast toggle; in roast mode, make the tone sharper while staying accurate. It must:
 - open with one sharp one-liner
 - include 2 to 4 evidence-based observations tied to the weakest categories
 - end with one hard-truth sentence about the biggest opportunity
-- stay specific to this screenshot, not generic.`
+- stay specific to this screenshot, not generic.
+- Do not use formulaic phrasing such as "X and Y are carrying the critique", "Start with X before polishing the edges", or "The design is trying to...".
+- Vary the opening and sentence rhythm naturally based on the findings.`
 }
