@@ -107,7 +107,7 @@ export function normalizeAuditResponse(raw: GeminiAuditResponse): GeminiAuditRes
       .filter(Boolean)
       .slice(0, 6),
     issues: raw.issues.map(normalizeIssue).slice(0, 8),
-    roastSummary: raw.roastSummary?.trim() || 'Analysis complete.',
+    roastSummary: raw.roastSummary?.trim() ?? '',
     improvements: (raw.improvements ?? [])
       .map((imp, i) => ({
         id: String(imp.id ?? i + 1),
@@ -145,4 +145,3 @@ function normalizeIssue(issue: Issue, index: number): Issue {
     recommendation: issue.recommendation?.trim() || '',
   }
 }
-

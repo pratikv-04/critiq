@@ -48,7 +48,7 @@ Return only this JSON object, with no markdown, code fences, commentary, or extr
 - roastSummary: always include this string; use an empty string in standard mode if needed.
 - improvements: always include this array, with at most 3 concise objects; each must contain id, title, description, impact.
 
-Complete EVERY required property. Never omit a field to save tokens. Prioritize completing the JSON structure over adding detail. Do not add keys such as verdictScore.
+Complete EVERY required property, including roastSummary and improvements. Never omit a field to save tokens: if there is nothing to report, return roastSummary as "" and improvements as []. Prioritize completing the JSON structure over adding detail. Do not add keys such as verdictScore.
 
 Avoid overly rounded scores like 70, 80, and 90 unless strongly justified.
 
