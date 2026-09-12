@@ -41,6 +41,13 @@ Return the complete JSON object now.
 
 Keep the response concise enough to fit the output limit. Use short, specific sentences in every description, issue, and improvement while preserving every required JSON field.
 
+Return only this JSON object, with no markdown, code fences, commentary, or extra properties:
+- scorecards: exactly 12 objects, in the requested category order; each has name, score, description.
+- whatWorking: 1 to 3 concise strings.
+- issues: 1 to 2 concise objects, each with id, title, severity, explanation, whyItMatters, userFriction, recommendation.
+- roastSummary: one concise string.
+- improvements: 1 to 2 concise objects, each with id, title, description, impact.
+
 Avoid overly rounded scores like 70, 80, and 90 unless strongly justified.
 
 Use nuanced realistic scoring such as:
