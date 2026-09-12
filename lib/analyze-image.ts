@@ -68,6 +68,48 @@ function logDev(message: string, payload?: unknown) {
   console.log(message, payload)
 }
 
+function redactLogValue(value: unknown): string {
+  return String(value ?? '')
+    .replace(/sk-or-v1-[a-z0-9]+/gi, '[redacted-api-key]')
+    .slice(0, 500)
+}
+
+function logOpenRouterApiError(error: unknown) {
+  const providerError = error as {
+    status?: unknown
+    code?: unknown
+    message?: unknown
+    error?: {
+      code?: unknown
+      message?: unknown
+      type?: unknown
+    }
+    body?: unknown
+  }
+  const nestedError = providerError.error
+
+  console.error('[Critiq OpenRouter API Error]', {
+    modelRequested: OPENROUTER_MODEL,
+    httpStatus: providerError.status ?? null,
+    errorCode: nestedError?.code ?? providerError.code ?? null,
+    errorType: nestedError?.type ?? null,
+    errorMessage: redactLogValue(
+      nestedError?.message ?? providerError.message ?? error
+    ),
+    responseBodyPresent:
+      providerError.error !== undefined || providerError.body !== undefined,
+  })
+}
+
+function logOpenRouterParseError(error: unknown, responseText: string) {
+  console.error('[Critiq OpenRouter Parse Error]', {
+    modelRequested: OPENROUTER_MODEL,
+    errorMessage: redactLogValue(error),
+    responseBodyPresent: responseText.length > 0,
+    responseTextLength: responseText.length,
+  })
+}
+
 function extractGeminiText(response: unknown): string {
   const data = response as {
     candidates?: Array<{
@@ -124,40 +166,56 @@ async function generateWithOpenRouter(
     baseURL: 'https://openrouter.ai/api/v1',
   })
 
-  const response = await client.chat.completions.create({
-    model: OPENROUTER_MODEL,
-    temperature: GENERATION_TEMPERATURE,
-    max_tokens: MAX_OUTPUT_TOKENS,
-    messages: [
-      {
-        role: 'system',
-        content: buildSystemPrompt({ roastMode }),
-      },
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: buildUserPrompt({ roastMode }),
-          },
-          {
-            type: 'image_url',
-            image_url: {
-              url: `data:${mimeType};base64,${imageBuffer.toString('base64')}`,
+  let response
+
+  try {
+    response = await client.chat.completions.create({
+      model: OPENROUTER_MODEL,
+      temperature: GENERATION_TEMPERATURE,
+      max_tokens: MAX_OUTPUT_TOKENS,
+      messages: [
+        {
+          role: 'system',
+          content: buildSystemPrompt({ roastMode }),
+        },
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: buildUserPrompt({ roastMode }),
             },
-          },
-        ],
-      },
-    ],
-  })
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:${mimeType};base64,${imageBuffer.toString('base64')}`,
+              },
+            },
+          ],
+        },
+      ],
+    })
+  } catch (error) {
+    logOpenRouterApiError(error)
+    throw error
+  }
 
   const text = response.choices[0]?.message?.content
 
   if (!text || typeof text !== 'string') {
+    logOpenRouterParseError(
+      new Error('OpenRouter returned empty response'),
+      ''
+    )
     throw new Error('OpenRouter returned empty response')
   }
 
-  return parseAuditJson(text)
+  try {
+    return parseAuditJson(text)
+  } catch (error) {
+    logOpenRouterParseError(error, text)
+    throw error
+  }
 }
 
 async function generateWithGemini(
