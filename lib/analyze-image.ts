@@ -10,7 +10,7 @@ export interface AnalyzeImageOptions {
 type ProviderMode = 'openrouter' | 'gemini' | 'auto'
 type ProviderName = 'openrouter' | 'gemini'
 
-const OPENROUTER_MODEL = 'openrouter/free'
+const OPENROUTER_MODEL = 'thinkingmachines/inkling:free'
 const GEMINI_MODEL = 'gemini-3.5-flash'
 const GENERATION_TEMPERATURE = 0.2
 const MAX_OUTPUT_TOKENS = 2500
@@ -301,7 +301,7 @@ export async function analyzeImage(
     return audit
   }
 
-  if (mode === 'openrouter') {
+  if (mode === 'openrouter' || mode === 'auto') {
     const audit = normalizeAuditResponse(
       await runProvider('openrouter', imageBuffer, mimeType, roastMode)
     )
@@ -309,24 +309,5 @@ export async function analyzeImage(
     return audit
   }
 
-  try {
-    const audit = normalizeAuditResponse(
-      await runProvider('openrouter', imageBuffer, mimeType, roastMode)
-    )
-    logDev('[Critiq Provider] handled by', 'openrouter')
-    return audit
-  } catch (error) {
-    if (!isRetryableOpenRouterFailure(error)) {
-      throw error
-    }
-
-    logDev('[Critiq Provider] OpenRouter failed, retrying with Gemini')
-
-    const audit = normalizeAuditResponse(
-      await runProvider('gemini', imageBuffer, mimeType, roastMode)
-    )
-    logDev('[Critiq Provider] handled by', 'gemini')
-    return audit
-  }
+  throw new Error(`Unsupported AI provider mode: ${mode}`)
 }
-
